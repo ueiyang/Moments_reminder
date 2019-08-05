@@ -46,15 +46,15 @@ public class NewSnsHook implements IXposedHookLoadPackage {
             public void run() {
                 try {
                     PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
-                    if(!pm.isScreenOn()){
-                        if(snsOn && snsActivity != null){
+                    if(!pm.isScreenOn()){  //黑屏时才运行程序，以免影响手机使用
+                        if(snsOn && snsActivity != null){   //有时网络不佳，刷新朋友圈时a方法并没有调用，朋友圈因此没有关闭，下一次刷新朋友圈时先关闭之前打开的activity。
                             snsActivity.finish();
                             snsOn = false;
                         }
                         else {
                             Intent intent = new Intent(context, Class.forName(snsActivityName));
                             snsLaunchByXP = true;
-                            context.startActivity(intent);
+                            context.startActivity(intent);  //打开朋友圈的activity
                             snsOn = true;
                             Log.d("myLog", "start sns");
                         }
@@ -67,7 +67,7 @@ public class NewSnsHook implements IXposedHookLoadPackage {
                 }
             }
         };
-        timer.schedule(timerTask,20000,600000);
+        timer.schedule(timerTask,20000,600000);  //每隔10分钟运行一次
         Log.d("myLog","timer.schedule(timerTask)");
     }
 
@@ -80,15 +80,15 @@ public class NewSnsHook implements IXposedHookLoadPackage {
             protected void beforeHookedMethod(XC_MethodHook.MethodHookParam param) throws Throwable {
                 if (param.args[0].equals("SnsInfo")) {
                     ContentValues contentValues = ((ContentValues) param.args[2]);
-                    int time = contentValues.getAsInteger("createTime");
-                    String name = contentValues.getAsString("userName");
-                    if(name.equals("wxid_xxx")) friend1 = true;
+                    int time = contentValues.getAsInteger("createTime");    //获取朋友圈发布时间
+                    String name = contentValues.getAsString("userName");  //获取朋友圈发布者微信id
+                    if(name.equals("wxid_xxx")) friend1 = true;   //wxid_xxx改成自己想要关注的好友的微信id即可
                     else if(name.equals("wxid_yyy")) friend2 = true;
                     else if(name.equals("wxid_zzz")) friend3 = true;
                     long msgCreatetime = Long.parseLong(time + "") * 1000L;
                     DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                     String snsDate = format.format(new Date(msgCreatetime));
-                    Log.d("myLog：", "insert:" + snsDate + " " + name);
+                    Log.d("myLog：", "insert:" + snsDate + " " + name);   //打印朋友圈发布时间和发布者
                 }
             }
         });
@@ -150,10 +150,10 @@ public class NewSnsHook implements IXposedHookLoadPackage {
     int.class,String.class,Class.forName("com.tencent.mm.network.q"),byte[].class,new XC_MethodHook() {
             @Override
             protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                if(snsLaunchByXP){
+                if(snsLaunchByXP){   //如果是xposed启模块启动的朋友圈，自己打开朋友圈则不会执行下列代码
                     Log.d("myLog", "a()方法被调用");
                     snsActivity.finish();
-                    Log.d("myLog", "snsActivity.finish()");
+                    Log.d("myLog", "snsActivity.finish()");  //关闭朋友圈
                     snsOn = false;
                     Log.d("myLog", "snsOn false");
                     snsLaunchByXP = false;
