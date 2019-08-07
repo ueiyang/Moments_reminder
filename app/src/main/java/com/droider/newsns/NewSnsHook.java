@@ -152,8 +152,8 @@ public class NewSnsHook implements IXposedHookLoadPackage {
             protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                 if(snsLaunchByXP){   //如果是xposed启模块启动的朋友圈，自己打开朋友圈则不会执行下列代码
                     Log.d("myLog", "a()方法被调用");
-                    snsActivity.finish();
-                    Log.d("myLog", "snsActivity.finish()");  //关闭朋友圈
+                    snsActivity.finish();   //关闭朋友圈
+                    Log.d("myLog", "snsActivity.finish()");
                     snsOn = false;
                     Log.d("myLog", "snsOn false");
                     snsLaunchByXP = false;
